@@ -1,5 +1,23 @@
 #lang racket
 
+(provide const?
+         var?
+         appl?
+         opr
+         opnd
+         lambda?
+         body
+         fp
+         cond?
+         prem
+         conc
+         altr
+         letrec?
+         dvar
+         dexp
+         meta-eval
+         init-env)
+
 (define (ext x v e)
   (lambda (z)
     (if (eq? x z)
@@ -8,7 +26,8 @@
 
 (define (const? x)
   (or (number? x)
-      (string? x)))
+      (string? x)
+      (boolean? x)))
 
 (define var? symbol?)
 
@@ -35,6 +54,7 @@
 (define (body expr)
   (match expr
     [`(lambda (,arg) ,body) body]
+    [`(letrec ([,dvar ,dexp]) ,body) body]
     [else #f]))
 
 (define (fp expr)
@@ -81,14 +101,36 @@
     [`(letrec ([,dvar ,dexp]) ,body) dexp]
     [else #f]))
 
+(define init-env
+  (foldr (lambda (b v e)
+           (ext b v e))
+         (lambda (x) (error "Missing binding : " x))
+         '(+ * - / zero?)
+         (list
+           (lambda (u)
+             (lambda (v)
+               (+ u v)))
+           (lambda (u)
+             (lambda (v)
+               (* u v)))
+           (lambda (u)
+             (lambda (v)
+               (- u v)))
+           (lambda (u)
+             (lambda (v)
+               (/ u v)))
+           (lambda (u)
+             (zero? u)))))
+
 (define (meta-eval r e)
   (cond
     [(const? r) r]
     [(var? r) (e r)]
     [(appl? r) ((meta-eval (opr r) e) (meta-eval (opnd r) e))]
     [(lambda? r) (evlambda r e)]
-    [(cond? r) (if (eval (prem r) e) (eval (conc r) e) (eval (altr r) e))]
+    [(cond? r) (if (meta-eval (prem r) e) (meta-eval (conc r) e) (meta-eval (altr r) e))]
     [(letrec? r) (letrec ([e1 (lambda (x) (if (eq? x (dvar r))
                                             (evlambda (dexp r) e1)
                                             (e x)))])
-                   (meta-eval (body r) e1))]))
+                   (meta-eval (body r) e1))]
+    [else (error "meta-eval : pattern not found")]))

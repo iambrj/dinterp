@@ -59,3 +59,21 @@
 
 (check-equal? (body '(letrec ([x (lambda (z) (z z))]) (x (lambda (y) (y y))))) '(x (lambda (y) (y y))))
 (check-equal? (body '(letrec ([id (lambda (z) z)]) (id 5))) '(id 5))
+
+(check-equal? (meta-eval '((lambda (x) x) 5)
+                         (lambda (x) (error "Missing binding : " x)))
+              5)
+(check-equal? (meta-eval '(letrec ([double (lambda (x)
+                                                     (if (zero? x)
+                                                       0
+                                                       ((+ 2) (double ((- x) 1)))))])
+                                    (double 3))
+                         init-env)
+                    6)
+(check-equal? (meta-eval '(letrec ([factorial (lambda (x)
+                                                     (if (zero? x)
+                                                       1
+                                                       ((* x) (factorial ((- x) 1)))))])
+                                    (factorial 5))
+                         init-env)
+                    120)
