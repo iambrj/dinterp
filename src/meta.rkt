@@ -7,8 +7,8 @@
       (e z))))
 
 (define (const? x)
-  (or number?
-      string?))
+  (or (number? x)
+      (string? x)))
 
 (define var? symbol?)
 
