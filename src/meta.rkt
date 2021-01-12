@@ -128,7 +128,9 @@
     [(var? r) (e r)]
     [(appl? r) ((meta-eval (opr r) e) (meta-eval (opnd r) e))]
     [(lambda? r) (evlambda r e)]
-    [(cond? r) (if (meta-eval (prem r) e) (meta-eval (conc r) e) (meta-eval (altr r) e))]
+    [(cond? r) (if (meta-eval (prem r) e)
+                 (meta-eval (conc r) e)
+                 (meta-eval (altr r) e))]
     [(letrec? r) (letrec ([e1 (lambda (x) (if (eq? x (dvar r))
                                             (evlambda (dexp r) e1)
                                             (e x)))])
