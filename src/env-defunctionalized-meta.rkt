@@ -1,7 +1,7 @@
 #lang racket
 
-; Does not use higher order functions, i.e. funvals and envs are represented
-; using records
+; Does not use higher order functions for envs, i.e. envs are represented using
+; records
 
 (provide const?
          var?
