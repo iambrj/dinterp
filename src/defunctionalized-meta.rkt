@@ -144,7 +144,6 @@
     [(cond? r) (if (meta-eval (prem r) e)
                  (meta-eval (conc r) e)
                  (meta-eval (altr r) e))]
-    [(letrec? r) (letrec ([e1 (rec r e)])
-                   (meta-eval (body r) e1))]
+    [(letrec? r) (meta-eval (body r) (rec r e))]
     [else (error "meta-eval : pattern not found")]))
 
